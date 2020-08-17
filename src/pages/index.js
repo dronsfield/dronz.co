@@ -23,23 +23,35 @@ const Content = styled.div`
 const Heading1 = styled.h1`
   margin: 0;
   font-weight: 500;
-  font-size: 50px;
+  font-size: 3.2em;
+  @media (max-width: 600px) {
+    font-size: 1.8em;
+  }
 `
 
 const Heading2 = styled.h2`
   margin: 0;
   font-weight: 300;
-  font-size: 40px;
+  font-size: 2.5em;
   color: #ccc;
+  @media (max-width: 600px) {
+    font-size: 1.5em;
+  }
 `
 
 const Buttons = styled.div`
   display: flex;
   flex-direction: row;
-  margin-top: 20px;
+  margin: -0.5em;
+  margin-top: 0.8em;
 
-  & > a:not(:first-child) {
-    margin-left: 15px;
+  & > a {
+    margin: 0.5em;
+  }
+
+  @media (max-width: 600px) {
+    font-size: 0.75em;
+    flex-wrap: wrap;
   }
 `
 
