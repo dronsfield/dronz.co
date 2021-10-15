@@ -1,6 +1,8 @@
 import React from "react";
 import styled from "styled-components";
 
+const USE_FOUR_CORNERS = false
+
 const Canvas = styled.canvas`
   position: fixed;
   background-color: #111;
@@ -10,8 +12,11 @@ const Canvas = styled.canvas`
   height: 0;
 `
 
-const CELL_SIZE = 100
-const MAX_ATTACHMENTS = 10
+const search = new URLSearchParams(window.location.search);
+const maxAttachmentsQuery = Number(search.get("x"))
+
+const CELL_SIZE = 80
+const MAX_ATTACHMENTS = maxAttachmentsQuery || 8
 
 // https://medium.com/@pdx.lucasm/canvas-with-react-js-32e133c05258
 function resizeCanvas(canvas) {
@@ -35,9 +40,11 @@ function resizeCanvas(canvas) {
   // return false
 }
 
+const integerize = USE_FOUR_CORNERS ? Math.floor : Math.round
+
 function getCell(mx, my) {
-  const x = Math.floor(mx / CELL_SIZE)
-  const y = Math.floor(my / CELL_SIZE)
+  const x = integerize(mx / CELL_SIZE)
+  const y = integerize(my / CELL_SIZE)
   return [x,y];
 }
 function compareCell(xy1, xy2) {
@@ -60,11 +67,9 @@ export const Background = () => {
     const wy = window.innerHeight;
     const cols = Math.ceil(wx / CELL_SIZE)
     const rows = Math.ceil(wy / CELL_SIZE)
-    console.log({ cols, rows })
     const grid = new Array(cols).fill(0).map(() => {
       return new Array(Math.ceil(rows)).fill(0);
     })
-    console.log({ grid })
     setGrid(grid);
   }, [])
 
@@ -72,9 +77,29 @@ export const Background = () => {
     if (canvas) resizeCanvas(canvas)
   }, [canvas])
 
-  const draw = React.useCallback((e) => {
+  const drawGrid = React.useCallback(() => {
     if (canvas) {
       const ctx = canvas.getContext("2d")
+      ctx.clearRect(0,0,canvas.width, canvas.height);
+      grid.forEach((_,col) => {
+        _.forEach((_,row) => {
+          ctx.fillStyle = "#DDD"
+          const x = col * CELL_SIZE
+          const y = row * CELL_SIZE
+          ctx.beginPath();
+          ctx.arc(x, y, 2, 0, 2 * Math.PI, false);
+          ctx.fillStyle = '#444';
+          ctx.fill();
+        })
+      })
+    }
+  }, [canvas, grid])
+
+  const draw = React.useCallback((e) => {
+    if (canvas) {
+      const ctx = canvas.getContext("2d");
+
+      drawGrid();
 
       const wx = window.innerWidth;
       const wy = window.innerHeight;
@@ -82,29 +107,12 @@ export const Background = () => {
       const my = e.clientY;
 
       if (mx > wx || my > wy) return
-
-      ctx.clearRect(0,0,canvas.width, canvas.height);
-      grid.forEach((_,col) => {
-        _.forEach((_,row) => {
-          ctx.fillStyle = "#DDD"
-          const x = col * CELL_SIZE
-          const y = row * CELL_SIZE
-          // console.log({ x, y })
-          // ctx.fillRect(x - 1, y, 5, 5);
-
-          ctx.beginPath();
-          ctx.arc(x, y, 4, 0, 2 * Math.PI, false);
-          ctx.fillStyle = '#444';
-          ctx.fill();
-        })
-      })
       
       const cell = getCell(mx, my)
       if (!compareCell(cell, previousCell)) {
         visited.push(cell);
         if (visited.length > MAX_ATTACHMENTS) {
           visited = visited.slice(-MAX_ATTACHMENTS);
-          console.log(JSON.stringify(visited))
         }
       }
       previousCell = cell
@@ -114,26 +122,28 @@ export const Background = () => {
         const topRightCorner = [topLeftCorner[0] + CELL_SIZE, topLeftCorner[1]]
         const bottomLeftCorner = [topLeftCorner[0], topLeftCorner[1] + CELL_SIZE]
         const bottomRightCorner = [topLeftCorner[0] + CELL_SIZE, topLeftCorner[1] + CELL_SIZE]
+
+        // const corners = [topLeftCorner, topRightCorner, bottomLeftCorner, bottomRightCorner];
+        // const corners = [topLeftCorner];
+        const corners = USE_FOUR_CORNERS ? [topLeftCorner, topRightCorner, bottomLeftCorner, bottomRightCorner] : [topLeftCorner]
+
+        const opacity = 1 - ((visited.length - index) / MAX_ATTACHMENTS)
         
-        ;[topLeftCorner, topRightCorner, bottomLeftCorner, bottomRightCorner].forEach(corner => {        
+        corners.forEach(corner => {
           ctx.beginPath()
-          ctx.strokeStyle = `rgba(255,255,255,${index / MAX_ATTACHMENTS})`
+          ctx.strokeStyle = `rgba(255,255,255,${opacity})`
           ctx.lineWidth = 1
           ctx.moveTo(corner[0],corner[1]);
           ctx.lineTo(mx, my);
           ctx.stroke();
         })
       })
-
-      
-
     }
   }, [canvas, grid])
 
   const leave = React.useCallback(() => {
     if (canvas) {
-      const ctx = canvas.getContext("2d")
-      ctx.clearRect(0,0,canvas.width, canvas.height);
+      drawGrid();
       visited = [];
     }
   }, [canvas])
