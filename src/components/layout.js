@@ -22,6 +22,7 @@ const GlobalStyle = createGlobalStyle`
     margin: 0;
     background-color: black;
     color: white;
+    overscroll-behaviour: contain;
   }
 
   #___gatsby, #gatsby-focus-wrapper, main {

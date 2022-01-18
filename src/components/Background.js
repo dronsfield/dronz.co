@@ -10,12 +10,12 @@ const Canvas = styled.canvas`
   left: 0;
   width: 0;
   height: 0;
+  overscroll-behaviour: contain;
 `
 
 const search = new URLSearchParams(window.location.search);
 const maxAttachmentsQuery = Number(search.get("x"))
 
-const CELL_SIZE = 80
 const MAX_ATTACHMENTS = maxAttachmentsQuery || 8
 
 // https://medium.com/@pdx.lucasm/canvas-with-react-js-32e133c05258
@@ -55,6 +55,7 @@ export const Background = () => {
   const [x, sx] = React.useState(false)
   const [grid, setGrid] = React.useState([])
   const [offset, setOffset] = React.useState([0,0])
+  const [CELL_SIZE, setCellSize] = React.useState(80)
 
   console.log(canvasRef.current)
   const canvas = canvasRef.current;
@@ -68,6 +69,8 @@ export const Background = () => {
   React.useEffect(() => {
     const wx = window.innerWidth;
     const wy = window.innerHeight;
+    const CELL_SIZE = wx > 600 ? 80 : 64
+    setCellSize(CELL_SIZE)
     const cols = Math.ceil(wx / CELL_SIZE)
     const rows = Math.ceil(wy / CELL_SIZE)
     const grid = new Array(cols).fill(0).map(() => {
@@ -106,7 +109,8 @@ export const Background = () => {
     }
   }, [canvas])
 
-  const draw = React.useCallback((e) => {
+  const draw = React.useCallback((evt) => {
+    console.log("DRAW")
     if (canvas) {
       const ctx = canvas.getContext("2d");
 
@@ -114,8 +118,8 @@ export const Background = () => {
 
       const wx = window.innerWidth;
       const wy = window.innerHeight;
-      const mx = e.clientX;
-      const my = e.clientY;
+      const mx = evt.changedTouches?.length ? evt.changedTouches[0].clientX : evt.clientX;
+      const my = evt.changedTouches?.length ? evt.changedTouches[0].clientY : evt.clientY;
 
       if (mx > wx || my > wy) return
       
@@ -161,6 +165,7 @@ export const Background = () => {
 
   React.useEffect(() => {
     document.addEventListener("mousemove", draw);
+    document.addEventListener("touchmove", draw)
     document.addEventListener("mouseleave", leave)
     // return () => document.removeEventListener("mousemove", draw)
   }, [draw, leave])
