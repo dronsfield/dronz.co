@@ -14,10 +14,11 @@ const Canvas = styled.canvas`
   z-index: 0;
 `
 
-const search = new URLSearchParams(window.location.search);
-const maxAttachmentsQuery = Number(search.get("x"))
+// const search = new URLSearchParams(window.location.search);
+// const maxAttachmentsQuery = Number(search.get("x"))
 
-const MAX_ATTACHMENTS = maxAttachmentsQuery || 8
+// const MAX_ATTACHMENTS = maxAttachmentsQuery || 8
+const MAX_ATTACHMENTS = 8
 
 // https://medium.com/@pdx.lucasm/canvas-with-react-js-32e133c05258
 function resizeCanvas(canvas) {
