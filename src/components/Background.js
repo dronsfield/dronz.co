@@ -42,11 +42,7 @@ function resizeCanvas(canvas) {
 
 const integerize = USE_FOUR_CORNERS ? Math.floor : Math.round
 
-function getCell(mx, my) {
-  const x = integerize(mx / CELL_SIZE)
-  const y = integerize(my / CELL_SIZE)
-  return [x,y];
-}
+
 function compareCell(xy1, xy2) {
   return xy1[0] === xy2[0] && xy1[1] === xy2[1]
 }
@@ -58,9 +54,16 @@ export const Background = () => {
   const canvasRef = React.useRef(null)
   const [x, sx] = React.useState(false)
   const [grid, setGrid] = React.useState([])
+  const [offset, setOffset] = React.useState([0,0])
 
   console.log(canvasRef.current)
   const canvas = canvasRef.current;
+
+  function getCell(mx, my) {
+    const x = integerize((mx + offset[0]) / CELL_SIZE) 
+    const y = integerize((my + offset[1]) / CELL_SIZE) 
+    return [x,y];
+  }
 
   React.useEffect(() => {
     const wx = window.innerWidth;
@@ -71,11 +74,12 @@ export const Background = () => {
       return new Array(Math.ceil(rows)).fill(0);
     })
     setGrid(grid);
+    const calcOffset = (dim) => (dim % CELL_SIZE) * 0.5
+    const offset = [calcOffset(wx), calcOffset(wy)]
+    setOffset(offset);
   }, [])
 
-  React.useEffect(() => {
-    if (canvas) resizeCanvas(canvas)
-  }, [canvas])
+  
 
   const drawGrid = React.useCallback(() => {
     if (canvas) {
@@ -84,8 +88,8 @@ export const Background = () => {
       grid.forEach((_,col) => {
         _.forEach((_,row) => {
           ctx.fillStyle = "#DDD"
-          const x = col * CELL_SIZE
-          const y = row * CELL_SIZE
+          const x = col * CELL_SIZE + offset[0]
+          const y = row * CELL_SIZE + offset[1]
           ctx.beginPath();
           ctx.arc(x, y, 2, 0, 2 * Math.PI, false);
           ctx.fillStyle = '#444';
@@ -94,6 +98,13 @@ export const Background = () => {
       })
     }
   }, [canvas, grid])
+
+  React.useEffect(() => {
+    if (canvas) {
+      resizeCanvas(canvas)
+      drawGrid()
+    }
+  }, [canvas])
 
   const draw = React.useCallback((e) => {
     if (canvas) {
@@ -118,7 +129,7 @@ export const Background = () => {
       previousCell = cell
 
       visited.map((xy, index) => {
-        const topLeftCorner = [xy[0] * CELL_SIZE, xy[1] * CELL_SIZE]
+        const topLeftCorner = [xy[0] * CELL_SIZE + offset[0], xy[1] * CELL_SIZE + offset[1]]
         const topRightCorner = [topLeftCorner[0] + CELL_SIZE, topLeftCorner[1]]
         const bottomLeftCorner = [topLeftCorner[0], topLeftCorner[1] + CELL_SIZE]
         const bottomRightCorner = [topLeftCorner[0] + CELL_SIZE, topLeftCorner[1] + CELL_SIZE]
