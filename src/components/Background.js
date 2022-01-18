@@ -11,6 +11,7 @@ const Canvas = styled.canvas`
   width: 0;
   height: 0;
   overscroll-behaviour: contain;
+  z-index: 0;
 `
 
 const search = new URLSearchParams(window.location.search);
@@ -25,10 +26,8 @@ function resizeCanvas(canvas) {
 // // canvas.height = window.innerHeight;
   
 //   if (canvas.width !== width || canvas.height !== height) {
-  console.log("resizeCanvas")
   const { devicePixelRatio: ratio = 1 } = window;
   const ctx = canvas.getContext('2d')
-  console.log(window.innerHeight, window.innerWidth)
   canvas.width = window.innerWidth * ratio
   canvas.height = window.innerHeight * ratio
   canvas.style.width = window.innerWidth + "px"
@@ -57,7 +56,6 @@ export const Background = () => {
   const [offset, setOffset] = React.useState([0,0])
   const [CELL_SIZE, setCellSize] = React.useState(80)
 
-  console.log(canvasRef.current)
   const canvas = canvasRef.current;
 
   function getCell(mx, my) {
@@ -69,7 +67,7 @@ export const Background = () => {
   React.useEffect(() => {
     const wx = window.innerWidth;
     const wy = window.innerHeight;
-    const CELL_SIZE = wx > 600 ? 80 : 64
+    const CELL_SIZE = wx > 600 ? 80 : Math.round(wx / 9.5);
     setCellSize(CELL_SIZE)
     const cols = Math.ceil(wx / CELL_SIZE)
     const rows = Math.ceil(wy / CELL_SIZE)
@@ -110,7 +108,6 @@ export const Background = () => {
   }, [canvas])
 
   const draw = React.useCallback((evt) => {
-    console.log("DRAW")
     if (canvas) {
       const ctx = canvas.getContext("2d");
 

@@ -1,15 +1,14 @@
-import React from "react"
 import styled from "styled-components"
 
 const Button = styled.button`
-  background-color: black;
-  border: 2px solid white;
+  background-color: #111;
+  border: 1px solid white;
   color: transparent;
   cursor: pointer;
   font-family: inherit;
   font-size: inherit;
-  line-height: 3em;
-  height: 3em;
+  line-height: 2.8em;
+  height: 2.8em;
   overflow: hidden;
   padding: 0 1em;
   position: relative;

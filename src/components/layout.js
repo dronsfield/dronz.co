@@ -33,7 +33,10 @@ const GlobalStyle = createGlobalStyle`
   }  
 `
 
-const Main = styled.main``
+const Main = styled.main`
+  z-index: 1;
+  position: relative;
+`
 
 const Layout = ({ children }) => {
   const data = useStaticQuery(graphql`
